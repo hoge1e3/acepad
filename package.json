@@ -1,0 +1,21 @@
+{
+  "name": "acepad",
+  "version": "1.0.0",
+  "description": "Mobile screen keyboard for ace editor.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hoge1e3/acepad.git"
+  },
+  "author": "hoge1e3 <hoge1e3@gmail.com> (https://github.com/hoge1e3/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hoge1e3/acepad/issues"
+  },
+  "homepage": "https://github.com/hoge1e3/acepad#readme",
+  "dependencies": {
+  }
+}
