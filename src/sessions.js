@@ -2,12 +2,25 @@ import {getEditor,getConfig} from './states.js';
 import {detachCommands,attachCommands,parseCommands} from './command.js';
 import {events} from './events.js';
 import {locate,currentLine} from './cursor.js';
-import {EventHandler} from "./events.js";
+import {EventHandler} from "@hoge1e3/events";
 export var sessionMap={};
 export function findSessions(){
     let r=[];
     for(let k in sessionMap)r.push(sessionMap[k]);
     return r;
+}
+export function findSession(f){
+    if(typeof f==="string"){
+        let i=sessionInfo[f];
+        return i&&i.session;
+    }else if(typeof f!=="function"){
+        let t=f;
+        f=(s,i)=>s===t||i===t;
+    }
+    for(let k in sessionMap){
+        let s=sessionMap[k];
+        if(f(s,sessionInfo(s)))return s;
+    }
 }
 export function     changeSession(sn){
     const editor=getEditor();
@@ -15,44 +28,27 @@ export function     changeSession(sn){
         if(!s)return alert("No such session "+sn);
         editor.setSession(s);
     }
-export function onChangeSession({oldSession, session}){
-        const editor=getEditor();
+export function onChangeSession({editor,oldSession, session}){
+        const evt={editor,oldSession, session};
         //console.log("chses",this);
         editor.focus();
         let osi=sessionInfo(oldSession);
+        osi.fire("deactivate",evt);
         if(osi.onDeactivated){
             osi.onDeactivated(editor);
         }
         detachCommands(osi.commands);
         let si=sessionInfo(session);
         si.lastOpen=new Date().getTime();
+        si.fire("activate",evt);
         if(si.onActivated){
             si.onActivated(editor);
         }
         attachCommands(si.commands);
-        events.fire("changeSession",{oldSession, session});
+        events.fire("changeSession",evt);
         setTimeout(()=>configureWorker({},session),500);
     }
     
-export function        autoSync(){
-        //createSessionList
-        const editor=getEditor();
-        let session=editor.session;
-        let si=sessionInfo(session);
-        let f=si.file;
-        if(!f)return;
-        if(f.isDir())return ;
-        if(f.lastUpdate()>si.ts){
-            session.setValue(
-                f.text());
-            si.ts=f.lastUpdate();
-        }else if(si.val!=
-            session.getValue()){
-            f.text(session.getValue());
-            si.val=session.getValue();
-            si.ts=f.lastUpdate();
-        }
-    }
 export function createSessionList(){
         createSession({
             type:"sessions",
@@ -75,23 +71,32 @@ export function createSessionList(){
             },
         });
     }
+export function removeSession(session){
+    let s=findSession(session);
+    if(!s)return false;
+    let si=sessionInfo(s);
+    let n=si.name;
+    si.fire("remove");
+    delete sessionMap[n];
+    return true;
+}
 export function    createSession(data){
-        data.session=data.session||
-        ace.createEditSession(data.text||"");
-        data.name=data.name||
-        data.file&&data.file.name()||
-        data.type&&`*${data.type}*`;
-        data.type=data.type||"file";
-        data.lastOpen=0;
-        data.commands=parseCommands(data.commands);
-        sessionInfo(data.session,data);
-        //data.session.$worker.send("setOptions",{esversion:8});
-        // after changing the session
-        data.session.on("changeMode", 
-        (...a)=>setTimeout(()=>configureWorker(...a),500));
-        events.fire("createSession",data);
-        return sessionMap[data.name]=data.session;
-    }
+    data.session=data.session||
+    ace.createEditSession(data.text||"");
+    data.name=data.name||
+    data.file&&data.file.name()||
+    data.type&&`*${data.type}*`;
+    data.type=data.type||"file";
+    data.lastOpen=0;
+    data.commands=parseCommands(data.commands);
+    sessionInfo(data.session,data);
+    //data.session.$worker.send("setOptions",{esversion:8});
+    // after changing the session
+    data.session.on("changeMode", 
+    (...a)=>setTimeout(()=>configureWorker(...a),500));
+    events.fire("createSession",data);
+    return sessionMap[data.name]=data.session;
+}
 export function configureWorker(e, session) {
     if (session.getMode().$id == "ace/mode/javascript"){
         const {jshint}=getConfig();
@@ -126,6 +131,15 @@ export function sessionInfo(s,data){
         EventHandler.attachTo(si);
         return si;
     }
+export function initSessions(){
+    let editor=getEditor();
+    editor.on("changeSession", (e)=>{
+        e.editor=editor;
+        onChangeSession(e);
+    });
+    createSessionList();
+}
+
 
 
 

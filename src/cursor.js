@@ -1,37 +1,40 @@
 import {getEditor} from './states.js';
-export function currentLine(session) {
-    const editor=getEditor();
-    session=session||editor.session;
+export function currentLine(...a) {
+    const session=parseSession(a);
     let r=session.getSelection().
     getRange().start.row;
     let line=session.doc.getLine(r);
     return line;
 }
-export function goTop(session){
-    const editor=getEditor();
-    session=session||editor.session;
+export function goTop(...a){
+    const session=parseSession(a);
     let s=session.getSelection();
     s.moveCursorFileStart();
     s.clearSelection();
 }
-export function goBottom(session){
-    const editor=getEditor();
-    session=session||editor.session;
+export function goBottom(...a){
+    const session=parseSession(a);
     let s=session.getSelection();
     s.moveCursorFileEnd();
     s.clearSelection();
 }
-export function goLineEnd(session){
-    const editor=getEditor();
-    session=session||editor.session;
+export function goLineEnd(...a){
+    const session=parseSession(a);
     let s=session.getSelection();
     s.moveCursorLineEnd();
     s.clearSelection();
 }
-export function print(...a){
+function isSession(s){
+    return s instanceof window.ace.EditSession;
+}
+function parseSession(a){
     const editor=getEditor();
-   let    session=editor.session;
-    if(a[0] instanceof ace.EditSession)session=a.shift();
+    let session=editor.session;
+    if(isSession(a[0]))session=a.shift();
+    return session;
+}
+export function print(...a){
+    const session=parseSession(a);
     session.insert(
         session.getSelection().
         getRange().start,
@@ -39,9 +42,7 @@ export function print(...a){
     );
 }
 export function locate(...a){
-    const editor=getEditor();
-    let session=editor.session;
-    if(a[0]&&a[0].insert)session=a.shift();
+    const session=parseSession(a);
     let [x,y]=a;
     let start={
         row: y, column:x
@@ -58,10 +59,21 @@ export function locate(...a){
             start,end:start
         });
 }
-locate.get=function(session){
-    const editor=getEditor();
-    session=session||editor.session;
+export function saveCursor(...a){
+    const session=parseSession(a);
+    let f=a.shift();
+    let sv=locate.get(session);
+    f();
+    locate(session,sv.column,sv.row);
+}
+locate.get=function(...a){
+    const session=parseSession(a);
     let r=session.getSelection().
     getRange().start;
     return  r;
 };
+locate.save=saveCursor;
+locate.bottom=goBottom;
+locate.lineEnd=goLineEnd;
+
+

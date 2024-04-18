@@ -1,6 +1,6 @@
 import {events} from './events.js';
 import {changeSession,sessionInfo} from './sessions.js';
-import {getMenuPos} from './states.js';
+import {getMenuPos,getEditor} from './states.js';
 /* global $,events,changeSession,sessionInfo*/
 export function showMenuButton(pos,html,cmd){
     if(!cmd){
@@ -12,9 +12,11 @@ export function showMenuButton(pos,html,cmd){
     let mp=getMenuPos();
     mp.menuY=mp.menuY||0;
     mp.menuX=mp.menuX||0;
-    let h=$("#editor").height();
-    let m=$("<button>").appendTo("#editor").addClass("menu");
-    if(!pos.top&&!top.bottom){
+    let editor=getEditor();
+    let container=$(editor.container);
+    let h=container.height();
+    let m=$("<button>").appendTo(container).addClass("menu");
+    if(!pos.top&&!pos.bottom){
         pos.bottom=mp.menuY;
         mp.menuY+=50;
         if(mp.menuY>h-50){
@@ -22,7 +24,7 @@ export function showMenuButton(pos,html,cmd){
             mp.menuX+=50;
         }
     }
-    if(!pos.left&&!top.right){
+    if(!pos.left&&!pos.right){
         pos.right=mp.menuX;
     }
     if(!pos.height){
@@ -48,13 +50,12 @@ export function showMenuButton(pos,html,cmd){
         
         pos.bottom-=np.pageY-p.pageY;
         pos.right-=np.pageX-p.pageX;
-        if(pos.bottom>$("#editor").height()-50){
+        if(pos.bottom>container.height()-50){
             pos.bottom=pp.bottom;
         }
-        if(pos.right>$("#editor").width()-50){
+        if(pos.right>container.width()-50){
             pos.right=pp.right;
         }
-        //console.log($("#editor").height());
         m.css(pos);
         p=np;
         e.preventDefault();
@@ -63,7 +64,8 @@ export function showMenuButton(pos,html,cmd){
     const touchend=(e)=>{
         m.removeClass("touched");
         if(new Date().getTime()-lastt<300){
-        cmd(e);
+            e.editor=getEditor();
+            cmd(e);
         }
         e.preventDefault();
         e.stopPropagation();
@@ -76,12 +78,52 @@ export function showMenuButton(pos,html,cmd){
     on("mousedown",touchstart).
     on("mousemove",touchmove).
     on("mouseup",touchend);
-    return m;
+    const isTextOverlapped=()=>{
+        let r=rect(self);
+        let x=r.left;
+        let y=r.top;
+        let {row,column}=editor.renderer.pixelToScreenCoordinates(x, y); 
+        let {row:row2,column:column2}=
+            editor.renderer.pixelToScreenCoordinates(
+            x+r.width, y+r.height); 
+        let s=editor.session.getLines(row,row2).
+        map((s)=>s.substring(column,column2)).
+        join("");
+        return s.length;
+    };
+    let ti=setInterval(()=>{
+        if(isTextOverlapped()){
+            m.css({opacity:"30%"});
+        }else m.css({opacity:"100%"});
+    },100);
+    const self={
+        element:m[0],
+        isTextOverlapped,
+        text:m.text.bind(m),  
+        remove(){
+            m.remove();
+            clearInterval(ti);
+        },
+    };
+    return self;
+}
+function rect(m){
+    let j=$(m.element);
+    let o=j.offset();
+    o.width=j.width();
+    o.height=j.height();
+    return o;
+}
+function all(editor){
+    return editor.container.querySelectorAll(".menu");    
 }
 export function showMenuButtons(d){
     for(let k in d){
         showMenuButton(k,d[k]);
     }
+}
+let prevs;
+export function initMenuButtons(){
     events.on("createSession",({name,session})=>{
         console.log(name);
         let m;
@@ -92,7 +134,20 @@ export function showMenuButtons(d){
         m=showMenuButton(name,()=>{
             changeSession(session);
         }); 
+        si.on("remove",()=>{
+            m.remove();
+        });
+        si.menuButton=m;
     });
+    events.on("changeSession",({oldSession,session})=>{
+        let si=sessionInfo(session);
+        let osi=sessionInfo(oldSession);
+        if(!si.menuButton||!osi.menuButton)return ;
+        $(osi.menuButton.element).removeClass("selected");
+        $(si.menuButton.element).addClass("selected");
+        
+    });
+    
 }
 
 //showMenuButton({right:0,top:0},"test",()=>editor.renderer.setShowGutter(!editor.renderer.getShowGutter()));

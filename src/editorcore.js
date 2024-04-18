@@ -5,6 +5,7 @@ import {initKeypad} from './keypad.js';
 import {doClick} from './keyhandler.js';
 export function initEditor(){
     const ace=window.ace;
+    if (!document.querySelector("#editor")) return initEditor_tonyu();
     window.ace_language_tools=ace.require("ace/ext/language_tools");
     let editor = ace.edit("editor");
     editor.setOptions({

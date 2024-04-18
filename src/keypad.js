@@ -1,6 +1,7 @@
 import {getEditor} from './states.js';
 import {setLongtap} from './longtap.js';
 import {modifierKeys,addModifierStyle,renderModifierState,setModifier} from './modifier.js';
+import {events} from './events.js';
 //keypad
 //addEventListener("visibilitychange", (event) => {});
 /*global $*/
@@ -110,6 +111,7 @@ export function getDatas(e,res){
     return res;
 }
 export function doClickRender(b) {
+    events.fire("keyclick",{b});
     _doClick(b);
     renderModifierState();
 }
@@ -132,7 +134,7 @@ export function showGuide(b,size=10) {
         top: r.top-size,
         width: r.width+size*2,
         height: r.height+size,
-        zIndex:300001,
+        zIndex:300001+size,
     });
     res.text(b.innerText);
     res[0].addEventListener("touchstart",(e)=>{
@@ -149,7 +151,7 @@ export function showGuide(b,size=10) {
             top: r.top-size,
             width: r.width+size*2,
             height: r.height+size,
-        });        
+        });
         size--;
         if (size>0) setTimeout(shrink,500);
         else res.remove();

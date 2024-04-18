@@ -1,5 +1,7 @@
 import {events} from './events.js';
 import {sessionInfo} from './sessions.js';
+import {findWord} from './states.js';
+
 export function addMarker(session, range, options) {
     options=options||{};
     let markerClass=options.markerClass||"marker";
@@ -88,9 +90,18 @@ export function getMarkerHTML(html, markerLayer, session, config, range, markerC
 }
 export function initMarker(){
     events.on("changeSession",({session})=>{
-        if (window.findWord) {
+        let f=findWord();
+        refreshMarker(session,f);
+        /*if (window.findWord) {
             clearMarkers(session);
             addMatchedTextMarker(session, window.findWord);
-        }
+        }*/
     });
 }
+export function refreshMarker(session, findWord){
+    if(!findWord)return ;
+    clearMarkers(session);
+    addMatchedTextMarker(session, findWord);
+}
+
+

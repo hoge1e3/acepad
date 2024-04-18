@@ -1,11 +1,36 @@
-import {locate,currentLine,print} from './cursor.js';
-import {sessionInfo,createSession} from './sessions.js';
-import {getEditor} from './states.js';
+import {events} from './events.js';
+import {setConfig,getEditor,findWord} from './states.js';
+import {exec,attachCommands,detachCommands} from './command.js';
+import {unsetSel} from './editmode.js';
+import {addToNgram} from './ngram.js';
+import {setModifier,renderModifierState} from './modifier.js';
+import {locate,currentLine,goLineEnd,print} from './cursor.js';
+import {showMenuButton,showMenuButtons} from "./menu.js";
+import {sessionInfo,createSession,changeSession,findSession,findSessions,removeSession} from './sessions.js';
 export function getInstance(){
     return {
         editor: getEditor(),
-        getEditor,
-        locate,currentLine,print,
-        sessionInfo,createSession,
+        events,
+        getEditor,setConfig,findWord,
+        exec,unsetSel,attachCommands,detachCommands,
+        setModifier,renderModifierState,
+        locate,currentLine,print,goLineEnd,
+        sessionInfo,createSession,changeSession,
+        findSession,findSessions,removeSession,
+        showMenuButton,showMenuButtons,
+        addToNgram,
     };
 }
+/*
+    const sh=this;
+    const {
+        events,
+        getEditor,setConfig,findWord,
+        exec,unsetSel,attachCommands,detachCommands,
+        setModifier,renderModifierState,
+        locate,currentLine,print,goLineEnd,
+        sessionInfo,createSession,changeSession,
+        findSession,findSessions,
+        showMenuButton,showMenuButtons,
+    }=sh.$acepad;
+*/

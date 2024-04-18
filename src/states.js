@@ -1,15 +1,12 @@
-export const state={};
+import o from "observable";
+export const state={
+};
+export const findWord=o("");
 export function getEditor(){
     return state.editor;
 }
 export function setEditor(e){
     state.editor=e;
-}
-export function getHome(){
-    return state.home;
-}
-export function setHome(h){
-    state.home=h;
 }
 export function setConfig(c){
     state.config=c;
