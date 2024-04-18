@@ -1,9 +1,10 @@
 {
   "name": "acepad",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Mobile screen keyboard for ace editor.",
   "main": "index.js",
   "scripts": {
+    "build": "npx webpack --mode=production",
     "demo": "npx http-server -o index.html",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,12 +21,12 @@
   "homepage": "https://github.com/hoge1e3/acepad#readme",
   "dependencies": {
     "@hoge1e3/events": "^1.0.0",
-    "ace-editor-builds": "^1.2.4",
-    "jquery": "^3.7.1",
     "observable": "^2.1.4"
   },
   "readmeFilename": "README.md",
   "devDependencies": {
+    "ace-editor-builds": "^1.2.4",
+    "jquery": "^3.7.1",
     "http-server": "^14.1.1",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4"

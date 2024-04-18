@@ -11,7 +11,6 @@ This package provides screen keyboard that is customizable via HTML.
 ```
 npm install
 npm run build
-npm run demo
 ```
 
 
@@ -24,3 +23,8 @@ npm run demo
 ## Customize keyboard
 
 Not documented yet. But `index.html` gives some idea.
+
+## Notice
+
+Ace editor and jQuery are needed to run `dist/index.js` but they are not contained to `dist/index.js`. 
+These libralies should be loaded(and global variables `ace` and `$` are set) via `<script>` before `dist/index.js` is loaded.
