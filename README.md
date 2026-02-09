@@ -5,6 +5,7 @@ Mobile screen keyboard for [ace editor](https://ace.c9.io/).
 
 This package provides screen keyboard that is customizable via HTML.
 
+See also [acepad-dev](https://github.com/hoge1e3/acepad-dev), more practical environment with virtual file system on browser.
 
 ## Build
 
